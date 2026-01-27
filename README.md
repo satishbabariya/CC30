@@ -9,6 +9,11 @@ TBD
 ## CC30 Compiler Repository Structure (Proposed) (Self-contained)
 ```
 cc30/                          # Root of the compiler repo
+├── specs/                     # Specifications and Implementation Plans (Spec-Kit)
+│   └── core-language/         # Core Compiler & Language Spec
+│       ├── spec.md            # Features & Requirements (from RFCs)
+│       ├── plan.md            # Implementation Strategy
+│       └── tasks.md           # Task Tracker
 ├── rfcs/                      # All RFC documents
 │   ├── RFC-0001-Overview.md
 │   ├── RFC-0002-Lexical-Grammar.md
