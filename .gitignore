@@ -53,3 +53,4 @@ cc30_manual
 test_semantic
 test_lexer
 test_parser
+cc30_driver
