@@ -34,6 +34,8 @@ private:
 
   // Symbol table for code gen (maps name to llvm::Value*)
   std::map<std::string, llvm::Value *> m_values;
+  // Map variable name to Type
+  std::map<std::string, Type> m_varTypes;
 };
 
 } // namespace cc30

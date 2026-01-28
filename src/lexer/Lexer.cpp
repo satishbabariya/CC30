@@ -132,6 +132,7 @@ TokenKind Lexer::checkKeyword(std::string_view text) {
       {"break", TokenKind::KwBreak},   {"continue", TokenKind::KwContinue},
       {"true", TokenKind::KwTrue},     {"false", TokenKind::KwFalse},
       {"safe", TokenKind::KwSafe},     {"unsafe", TokenKind::KwUnsafe},
+      {"pub", TokenKind::KwPub},
   };
 
   auto it = keywords.find(text);
@@ -201,10 +202,10 @@ Token Lexer::next() {
     return makeToken(TokenKind::OpenBracket);
   case ']':
     return makeToken(TokenKind::CloseBracket);
+  case ':':
+    return makeToken(match(':') ? TokenKind::ColonColon : TokenKind::Colon);
   case ';':
     return makeToken(TokenKind::SemiColon);
-  case ':':
-    return makeToken(TokenKind::Colon);
   case ',':
     return makeToken(TokenKind::Comma);
   case '.':
@@ -227,6 +228,8 @@ Token Lexer::next() {
     if (match('='))
       return makeToken(TokenKind::NotEqual);
     return makeToken(TokenKind::Bang);
+  case '?':
+    return makeToken(TokenKind::Question);
   case '=':
     if (match('='))
       return makeToken(TokenKind::EqualEqual);

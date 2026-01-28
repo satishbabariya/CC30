@@ -34,6 +34,7 @@ enum class TokenKind {
   KwFalse,    // false
   KwSafe,     // safe
   KwUnsafe,   // unsafe
+  KwPub,      // pub
 
   // Punctuation
   OpenParen,    // (
@@ -43,6 +44,7 @@ enum class TokenKind {
   OpenBracket,  // [
   CloseBracket, // ]
   Colon,        // :
+  ColonColon,   // ::
   SemiColon,    // ;
   Comma,        // ,
   Dot,          // .
@@ -57,6 +59,7 @@ enum class TokenKind {
   Ampersand, // &
   Pipe,      // |
   Bang,      // !
+  Question,  // ?
 
   // Comparison
   EqualEqual,   // ==

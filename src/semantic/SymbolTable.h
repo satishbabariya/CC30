@@ -15,6 +15,11 @@ public:
     scopes.push_back({});
   }
 
+  struct Symbol {
+    Decl *decl;
+    std::optional<Type> type;
+  };
+
   void enterScope() { scopes.push_back({}); }
 
   void exitScope() {
@@ -23,27 +28,27 @@ public:
     }
   }
 
-  bool declare(const std::string &name, Decl *decl) {
+  bool declare(const std::string &name, Decl *decl, std::optional<Type> type = std::nullopt) {
     auto &currentScope = scopes.back();
     if (currentScope.find(name) != currentScope.end()) {
       return false; // Already declared in this scope
     }
-    currentScope[name] = decl;
+    currentScope[name] = {decl, type};
     return true;
   }
 
-  Decl *resolve(const std::string &name) {
+  Symbol *resolve(const std::string &name) {
     for (auto it = scopes.rbegin(); it != scopes.rend(); ++it) {
       auto found = it->find(name);
       if (found != it->end()) {
-        return found->second;
+        return &found->second;
       }
     }
     return nullptr;
   }
 
 private:
-  std::vector<std::unordered_map<std::string, Decl *>> scopes;
+  std::vector<std::unordered_map<std::string, Symbol>> scopes;
 };
 
 } // namespace cc30

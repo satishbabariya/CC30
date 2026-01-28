@@ -24,12 +24,15 @@ private:
   StmtPtr parseStmt();
   StmtPtr parseLetStmt();
   StmtPtr parseReturnStmt();
+  StmtPtr parseIfStmt();
+  StmtPtr parseWhileStmt();
   std::unique_ptr<Block> parseBlock();
 
   // Expressions
   ExprPtr parseExpr();
   ExprPtr parsePrimary();
   ExprPtr parseBinary(int precedence, ExprPtr left);
+  int getPrecedence(TokenKind kind);
 
   // Helpers
   bool match(TokenKind kind);
