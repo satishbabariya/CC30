@@ -6,7 +6,7 @@
 **Category:** Language Core
 **Edition:** 2030
 **Author:** C 2030 Working Group
-**Last Updated:** 2026-01-27
+**Last Updated:** 2026-03-23
 
 ---
 
@@ -146,6 +146,47 @@ Rules:
 
 * `defer` executes even when returning early via `?`
 * Ensures no leaks
+
+### 7.1 Conditional Defer (`defer_on_err`)
+
+For partial initialization, `defer_on_err` runs cleanup **only when the function returns `Err`**:
+
+```c
+fn setup() -> Result<@owned Connection*, NetError> {
+    @owned Socket* sock = socket_create()?;
+    defer_on_err close(sock);  // only runs if we return Err
+
+    @owned Connection* conn = connect(sock)?;
+    return Ok(conn);  // success: defer_on_err does NOT run
+}
+```
+
+* `defer_on_err` is defined in RFC-0004 §8.3
+* Order follows LIFO interleaved with regular `defer`
+
+### 7.2 Error Handling with `guard`
+
+The `guard` statement (RFC-0015 §4) integrates naturally with error propagation:
+
+```c
+fn process(@borrowed Packet* pkt) -> Result<(), NetError> {
+    guard hdr = pkt->header else {
+        return Err(NetError::MalformedPacket);
+    }
+    // hdr is non-null for the rest of the function
+    process_header(hdr);
+    return Ok(());
+}
+```
+
+`guard let` with pattern matching (RFC-0018 §14):
+
+```c
+guard let Ok(data) = parse(input) else {
+    return Err(ParseError::Invalid);
+}
+// data is in scope and bound to the Ok value
+```
 
 ---
 

@@ -6,7 +6,7 @@
 **Category:** Language Core
 **Edition:** 2030
 **Author:** C 2030 Working Group
-**Last Updated:** 2026-01-27
+**Last Updated:** 2026-03-23
 
 ---
 
@@ -118,12 +118,16 @@ Raw pointers are **unsafe by default**.
 ```c
 @owned T*
 @borrowed T*
+@mut @borrowed T*
 @nullable T*
+T*?               // shorthand for @nullable T* (RFC-0015 §6)
 ```
 
 Rules:
 
 * Ownership annotations are enforced in safe code
+* `@mut @borrowed` denotes a mutable borrow (see RFC-0020)
+* `T*?` and `@nullable T*` are interchangeable (see RFC-0015 §6)
 * Violations are compile-time errors
 * Ignored in legacy mode
 
@@ -334,6 +338,18 @@ Rules:
 * No runtime type information
 * No specialization ambiguity
 
+### 11.2 Protocol Constraints
+
+Generic type parameters may be constrained by protocols (see RFC-0015 §5):
+
+```c
+fn sort<T: Comparable>(T[] items, usize count);
+fn create_map<K: Hashable + Comparable, V>(usize capacity) -> Result<@owned Map<K, V>*, MemError>;
+```
+
+* Constrained generics are checked at compile time
+* Unconstrained generics accept any type (existing behavior)
+
 ---
 
 ## 12. Const & Immutability
@@ -363,9 +379,10 @@ struct Config {
 
 ## 13. Type Inference
 
-* Local inference permitted
+* Local inference permitted (see RFC-0019 for complete rules)
 * Function signatures must be explicit
 * No global type inference
+* `let` / `var` declarations enable inferred types: `let x = 42;` (see RFC-0015 §3, RFC-0019)
 
 ---
 

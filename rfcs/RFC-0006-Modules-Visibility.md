@@ -178,12 +178,19 @@ No duplication. No `#ifdef`. No macro leakage.
 
 * Macros are **module-local by default**
 * Macros do NOT leak across module boundaries
+* **Implementation:** The compiler preprocesses each module independently. Macro definitions from one module are not visible during preprocessing of another module, even if imported. This differs from C's textual `#include` model.
 
 ```c
-#define PAGE_SHIFT 12 // private
+#define PAGE_SHIFT 12 // private to this module
 ```
 
-### Exported Macros (discouraged)
+In new C 2030 code, prefer `comptime` constants over macros (see RFC-0016):
+
+```c
+comptime usize PAGE_SHIFT = 12;  // preferred
+```
+
+### Exported Macros (discouraged, legacy only)
 
 ```c
 export macro PAGE_SHIFT 12;
@@ -193,6 +200,7 @@ Rules:
 
 * Exported macros must be explicitly declared
 * Tooling must warn on exported macros
+* New code should use `comptime` (RFC-0016) instead
 
 ---
 
@@ -211,8 +219,12 @@ init {
 Rules:
 
 * Runs before `main()`
-* Execution order follows dependency DAG
+* Execution order follows dependency DAG (topological sort; dependees initialize before dependents)
 * No global constructor ordering hacks
+* At most **one** `init` block per module
+* `init` blocks may access module-private symbols
+* `init` blocks **may fail** by returning `Result<(), E>` — failure aborts program startup with a diagnostic
+* `init` blocks must not spawn threads or perform unbounded I/O
 
 ---
 
@@ -250,18 +262,27 @@ Rationale:
 
 ## Conditional Compilation
 
-Modules replace most `#ifdef` usage.
-
-Allowed uses:
-
-* Platform detection
-* Compiler feature checks
+Modules replace most `#ifdef` usage. In new code, prefer `comptime` (RFC-0016) over preprocessor directives:
 
 ```c
+// Preferred: comptime conditional compilation
+comptime if (ARCH == Architecture::x86_64) {
+    import arch.x86;
+}
+
+// Legacy: preprocessor conditional (transitional only)
 #if arch(x86_64)
 import arch.x86;
 #endif
 ```
+
+### Built-in Platform Predicates
+
+The following predicates are available in both `#if` and `comptime if`:
+
+* `arch(x86_64)`, `arch(aarch64)`, `arch(riscv64)` — CPU architecture
+* `os(linux)`, `os(none)` — target operating system
+* `feature("name")` — compiler feature check (see RFC-0014)
 
 ---
 

@@ -6,7 +6,7 @@
 **Category:** Language Core
 **Edition:** 2030
 **Author:** C 2030 Working Group
-**Last Updated:** 2026-01-27
+**Last Updated:** 2026-03-23
 
 ---
 
@@ -53,20 +53,22 @@ C 2030 ensures:
 ### 3.1 Thread Creation
 
 ```c
-fn spawn(fn() -> void) -> Thread;
+fn spawn(closure() -> void @move) -> @owned Thread;
 ```
 
-* Returns a **handle** representing the thread
+* Takes a **move-capture closure** (see RFC-0017) — all captured variables are moved into the closure
+* Returns an `@owned` **handle** representing the thread
 * Thread runs independently
-* Handle is `@owned`
 
 Example:
 
 ```c
-@owned Thread t = spawn(|| {
+@owned Thread t = spawn(move || {
     printf("Hello from thread\n");
 });
 ```
+
+The `move` keyword ensures no `@borrowed` references escape to the new thread (RFC-0004 §7, RFC-0017 §6).
 
 ---
 
@@ -158,7 +160,8 @@ C 2030 supports standard memory orderings:
 Rules:
 
 * Safe code defaults to **SequentiallyConsistent**
-* Relaxed operations allowed only in `unsafe`
+* **Acquire**, **Release**, and **AcquireRelease** orderings are allowed in safe code — they provide sufficient guarantees to prevent data races
+* **Relaxed** ordering is allowed only in `unsafe` — it provides no ordering guarantees beyond atomicity, which can lead to subtle correctness bugs
 * Compiler may reorder non-atomic accesses respecting ownership & lifetime
 
 ---

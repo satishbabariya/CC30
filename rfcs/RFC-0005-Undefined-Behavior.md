@@ -6,7 +6,7 @@
 **Category:** Language Core
 **Edition:** 2030
 **Author:** C 2030 Working Group
-**Last Updated:** 2026-01-27
+**Last Updated:** 2026-03-23
 
 ---
 
@@ -249,15 +249,16 @@ atomic<u32> counter;
 
 ```c
 unsafe {
-    // UB allowed
+    // safety guarantees and ownership rules relaxed
 }
 ```
 
-Inside `unsafe`:
+An `unsafe` block is a **single mechanism** that simultaneously relaxes both safety guarantees (this RFC) and ownership rules (RFC-0004 §14). Inside `unsafe`:
 
 * Compiler may assume programmer correctness
 * Traps may be omitted
 * UB is permitted but **localized**
+* Ownership and aliasing rules are relaxed (RFC-0004, RFC-0020)
 
 ---
 
