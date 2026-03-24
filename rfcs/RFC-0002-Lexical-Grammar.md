@@ -6,7 +6,7 @@
 **Category:** Language Core
 **Edition:** 2030
 **Author:** C 2030 Working Group
-**Last Updated:** 2026-01-27
+**Last Updated:** 2026-03-23
 
 ---
 
@@ -105,6 +105,7 @@ continue
 return
 goto
 defer
+guard
 ```
 
 ---
@@ -123,6 +124,10 @@ extern
 export
 import
 module
+let
+var
+protocol
+impl
 ```
 
 ---
@@ -133,6 +138,7 @@ module
 void
 bool
 unsafe
+closure
 ```
 
 > Note: Primitive types (`i32`, `u64`, etc.) are **builtin identifiers**, not keywords.
@@ -308,8 +314,11 @@ r"no escaping here"
 ### 7.6 Pointer & Addressing
 
 ```
-*   &
+*   &   ?
 ```
+
+* `?` as a **type suffix** on pointers denotes nullable: `T*?` is equivalent to `@nullable T*` (see RFC-0015 §6)
+* `?` as a **postfix operator** on expressions propagates errors from `Result` types (see RFC-0007 §5.1)
 
 ---
 

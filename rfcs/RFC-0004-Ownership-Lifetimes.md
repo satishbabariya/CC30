@@ -6,7 +6,7 @@
 **Category:** Language Core
 **Edition:** 2030
 **Author:** C 2030 Working Group
-**Last Updated:** 2026-01-27
+**Last Updated:** 2026-03-23
 
 ---
 
@@ -227,14 +227,23 @@ fn bad() {
 
 ---
 
-### 7.3 Multiple Borrows
+### 7.3 Multiple Borrows (Aliasing Rule)
 
-C 2030 allows:
+C 2030 enforces the **aliasing rule**: at any given time, a value may have EITHER:
 
-* Multiple immutable borrows
-* Single mutable borrow (future RFC may refine mutability)
+* **Any number of immutable borrows** (`@borrowed T*`), OR
+* **Exactly one mutable borrow** (`@mut @borrowed T*`)
 
-This is enforced conservatively.
+But **never both simultaneously**. See RFC-0020 for the complete specification of mutable borrows, non-lexical lifetimes, and aliasing rules.
+
+```c
+var i32 x = 10;
+let p1 = &x;            // immutable borrow
+let p2 = &x;            // OK: multiple immutable borrows
+// let q = &mut x;      // ERROR: cannot take mutable borrow while immutable borrows exist
+```
+
+This is enforced conservatively in safe code and relaxed in `unsafe` blocks.
 
 ---
 
@@ -263,9 +272,21 @@ defer free(buf);
 
 Rules:
 
-* `defer` executes on scope exit
-* Deferred actions are canceled on ownership transfer
-* Order is LIFO
+* `defer` executes on scope exit (including early returns via `?` operator)
+* Deferred actions are canceled on ownership transfer via `move()`
+* Order is LIFO (last `defer` executes first)
+* `defer` runs even during panic unwinding (cleanup is guaranteed)
+
+### 8.3 Conditional Defer (`defer_on_err`)
+
+```c
+@owned Socket* sock = socket_create()?;
+defer_on_err close(sock);  // only runs if the function returns Err
+```
+
+* `defer_on_err` executes only when the enclosing function returns an `Err` variant
+* Useful for partial initialization where cleanup depends on overall success
+* Order relative to `defer` follows LIFO as if interleaved
 
 ---
 
@@ -367,17 +388,17 @@ extern fn get_buf() -> @borrowed u8*;
 
 ```c
 unsafe {
-    // ownership rules relaxed
+    // ownership and safety rules relaxed
 }
 ```
 
-Within `unsafe`:
+An `unsafe` block simultaneously relaxes **both** ownership rules (this RFC) and safety guarantees (RFC-0005). Within `unsafe`:
 
-* Lifetime violations permitted
-* Pointer arithmetic permitted
+* Ownership: lifetime violations permitted, raw pointer arithmetic permitted, borrow aliasing rules relaxed
+* Safety: UB is permitted but localized, trap checks may be omitted (RFC-0005 §11)
 * Compiler emits warnings, not errors
 
-Outside `unsafe`, rules are enforced strictly.
+Outside `unsafe`, all rules are enforced strictly. There is no way to relax ownership without also entering `unsafe` — they are the same mechanism.
 
 ---
 
